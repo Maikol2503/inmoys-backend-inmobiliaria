@@ -9,6 +9,7 @@ class Property(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     sku = Column(String(100), unique=True, index=True)
+    destacado = Column(Boolean, default=False) 
     descripcion = Column(Text)
     precio = Column(Float)
     tipo = Column(String(100))

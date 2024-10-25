@@ -17,6 +17,7 @@ SQL_SELECT_PROPERTIES = """
         propietario.telefono AS propietario_telefono,
         properties.sku AS property_sku,
         properties.id AS property_id,
+        properties.destacado AS property_destacado,
         properties.descripcion AS property_descripcion,
         properties.precio AS property_precio,
         properties.tipo AS property_tipo,
@@ -46,6 +47,7 @@ def build_property_dict(row):
     return {
         "sku": row.property_sku,
         "id_property": row.property_id,
+        "destacado": row.property_destacado,
         "nombre": row.propietario_nombre,
         "apellido": row.propietario_apellido,
         "documento": row.propietario_documento,

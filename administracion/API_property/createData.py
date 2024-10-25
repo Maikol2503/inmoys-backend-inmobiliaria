@@ -10,6 +10,7 @@ class CreateData:
     def datageneral(self, data):
         dataGeneral = {
             'sku': self.generate_sku(data.tipo[0] + data.transaccion[0]),
+            'destacado': data.destacado,
             'descripcion': data.descripcion,
             'precio': data.precio,
             'tipo': data.tipo,

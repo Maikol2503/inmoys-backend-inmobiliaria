@@ -14,6 +14,7 @@ from administracion.API_contrato.routes.get import getContrato
 
 from administracion.API_property.routes.add import addProperties
 from administracion.API_property.routes.get import getProperties
+from administracion.API_property.routes.public_get import publicProperties
 from administracion.API_property.routes.update import updateProperties
 from administracion.API_property.routes.delete import deleteProperties
 
@@ -43,6 +44,7 @@ app.include_router(updatePropietario)
 
 app.include_router(addImagenProperty)
 app.include_router(getImagenProperty)
+app.include_router(publicProperties)
 app.include_router(deleteImagenProperty)
 app.include_router(updateImagenProperty)
 
@@ -55,7 +57,8 @@ Base.metadata.create_all(bind=engine)
 
 
 origins = [
-    "http://localhost:4200",
+    "http://localhost:4300",
+    "http://localhost:4200"
 ]
 
 # Configuración de CORS

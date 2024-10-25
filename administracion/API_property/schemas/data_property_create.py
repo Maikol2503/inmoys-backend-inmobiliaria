@@ -12,6 +12,7 @@ class DatosPropiedad(BaseModel):
     correo: Optional[str] = None
     telefono: Optional[str] = None
     sku: Optional[str] = None
+    destacado: Optional[bool] = None
     titulo: Optional[str] = None
     descripcion: Optional[str] = None
     precio: Optional[float] = None
