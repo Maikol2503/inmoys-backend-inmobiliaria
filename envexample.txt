@@ -1,0 +1,9 @@
+DATABASE_URL=mysql+pymysql://<usuario>:<contrasena>@localhost:3306/<nombre_base_de_datos>
+SECRET_KEY= <tu clave secreta de js web token>
+DEBUG=true
+
+TOKEN = <contrasena de aplicaciones del correo>
+CORREO = <correo electronico que envia los mensajes desde el formulario>
+
+
+quitar todos lo < >

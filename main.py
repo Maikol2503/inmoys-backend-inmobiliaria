@@ -26,10 +26,13 @@ from administracion.API_property.images_propertys.routes.get import getImagenPro
 from administracion.API_property.images_propertys.routes.update import updateImagenProperty
 from administracion.API_property.images_propertys.routes.delete import deleteImagenProperty
 
+from mail.mail import sendEmail 
 app = FastAPI()
 jinja2Templates = Jinja2Templates(directory="templates")
 
+#servir imagenes 
 app.mount("/images", StaticFiles(directory='imagenes'), name="images")
+app.mount("/images-for-web", StaticFiles(directory='imagenes-para-web'), name="images")
 
 app.include_router(admiRegister)
 app.include_router(admiLogin)
@@ -52,6 +55,8 @@ app.include_router(addProperties)
 app.include_router(getProperties)
 app.include_router(updateProperties)
 app.include_router(deleteProperties)
+
+app.include_router(sendEmail)
 
 Base.metadata.create_all(bind=engine)
 
