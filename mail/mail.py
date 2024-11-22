@@ -14,32 +14,36 @@ SMTP_PORT = 587
 EMAIL_ADDRESS = settings.correo
 EMAIL_PASSWORD = settings.token
 
-
 @sendEmail.post("/send-email")
 async def send_email(
-    nombre: str = Form(None), 
-    apellido: str = Form(None), 
-    email: str = Form(...), 
-    telefono: str = Form(...), 
-    mensaje: str = Form(None)
+    nombre: str = Form('Sin Nombre'), 
+    apellido: str = Form('Sin Apellido'), 
+    email: str = Form('Sin Email'), 
+    telefono: str = Form('Sin telefono'), 
+    mensaje: str = Form('Sin mensaje'),
+    sku: str = Form('SKU no especificado'),
 ):
 
-    print(EMAIL_ADDRESS, EMAIL_PASSWORD)
+    print(sku)
     try:
         # Crear el mensaje de correo
         msg = MIMEMultipart()
         msg['From'] = EMAIL_ADDRESS
-        msg['To'] = "mgarrido2503@gmail.com" # O reemplaza con tu correo para recibirlo tú mismo
+        msg['To'] = "ysalguerot@gmail.com"  # O reemplaza con tu correo para recibirlo tú mismo
         msg['Subject'] = "Nuevo mensaje de contacto"
 
-        # Cuerpo del correo
-        body = f"""
-            <strong>Nombre:</strong> {nombre} <br>
-            <strong>Apellido:</strong> {apellido} <br>
-            <strong>Email:</strong> {email} <br>
-            <strong>Teléfono:</strong> {telefono} <br>
-            <strong>Mensaje:</strong> {mensaje} <br>
-        """
+        data = {
+            'nombre': nombre,
+            'apellido': apellido,
+            'email': email,
+            'telefono': telefono,
+            'mensaje': mensaje,
+            'sku': sku
+        }
+
+        # Generar el cuerpo del mensaje con la función
+        body = body_message(data)
+        
         msg.attach(MIMEText(body, 'html'))
 
         # Enviar el correo
@@ -72,6 +76,25 @@ async def send_email(
         print(error_msg)  # Registro del error
         return JSONResponse(content={"error": error_msg}, status_code=500)
 
-# Recuerda incluir tu router en la aplicación principal si es necesario
-# app = FastAPI()
-# app.include_router(sendEmail)
+
+
+
+def body_message(data: dict) -> str:
+    """
+    Genera el cuerpo del mensaje de correo con el contenido de los datos proporcionados.
+    """
+    # Cuerpo del correo
+    body = f"""
+        <strong>Nombre:</strong> {data['nombre']} <br>
+        <strong>Apellido:</strong> {data['apellido']} <br>
+        <strong>Email:</strong> {data['email']} <br>
+        <strong>Teléfono:</strong> {data['telefono']} <br>
+        <strong>Mensaje:</strong> {data['mensaje']} <br>
+    """
+    # Agregar SKU si está presente
+    if data.get('sku') != 'SKU no especificado':
+        body += f"""
+            <strong>Interés en propiedad:</strong> El cliente ha mostrado interés en la propiedad con SKU: {data['sku']} <br>
+        """
+
+    return body

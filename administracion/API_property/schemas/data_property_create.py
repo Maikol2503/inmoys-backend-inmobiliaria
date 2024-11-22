@@ -6,11 +6,11 @@ class ImagePreview(BaseModel):
     image_name: str
 
 class DatosPropiedad(BaseModel):
-    nombre: Optional[str] = None
-    apellido: Optional[str] = None
-    documento: Optional[str] = None
-    correo: Optional[str] = None
-    telefono: Optional[str] = None
+    # nombre: Optional[str] = None
+    # apellido: Optional[str] = None
+    # documento: Optional[str] = None
+    # correo: Optional[str] = None
+    # telefono: Optional[str] = None
     sku: Optional[str] = None
     destacado: Optional[bool] = None
     titulo: Optional[str] = None

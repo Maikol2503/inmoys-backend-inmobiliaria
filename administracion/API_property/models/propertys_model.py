@@ -24,7 +24,8 @@ class Property(Base):
     nombreCalle = Column(String(100))
     disponibilidad= Column(String(100))
     detalles = Column(JSON) 
-    propietario_id = Column(Integer, ForeignKey('propietario.id'))
+    image = Column(JSON) 
+    # propietario_id = Column(Integer, ForeignKey('propietario.id'))
     fecha_creacion = Column(DateTime, default=func.now())
     fecha_actualizacion = Column(DateTime, default=func.now(), onupdate=func.now())
 

@@ -65,17 +65,7 @@ def fetch_public_properties(sql_query, params={}):
         rows = result.fetchall()
     return rows
 
-
-
-
-
-
-
-
-
-
-
-
+# Funcion para obtener las propiedades aplicando filtros
 @publicProperties.get("/get-public-properties-disponibles")
 async def get_public_properties(
     tipo: str = None,
@@ -100,10 +90,12 @@ async def get_public_properties(
     calefaccion: bool = None,
     terraza: bool = None,
     balcon: bool = None,
-    estadoInmueble: str = None
+    estadoInmueble: str = None,
+    order: str = "recientes",
+    limit: int = 2,
+    offset: int = 1
 ):
     try:
-     
         query_conditions = ["properties.disponibilidad = 'disponible'"]
 
         if tipo:
@@ -113,7 +105,7 @@ async def get_public_properties(
         if ciudad:
             query_conditions.append(f"properties.ciudad = '{ciudad}'")
         if zona:
-            query_conditions.append(f"(properties.zona LIKE '%{zona}%' OR properties.ciudad LIKE '%{zona}%')")
+            query_conditions.append(f"(properties.zona LIKE '%{zona}%' OR properties.ciudad LIKE '%{zona}%' OR properties LIKE '%{zona}%')")
         if habitaciones:
             if numeroExactoHabitaciones == True:
                 query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.habitaciones') = {habitaciones}")
@@ -145,7 +137,6 @@ async def get_public_properties(
         if balcon is not None and balcon == True:
             query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.balcon') = '{str(balcon).lower()}'")
         
-        
         # Filtro de precio en rango, solo si el valor es mayor que 0
         if precioDesde is not None and precioDesde > 0:
             query_conditions.append(f"properties.precio >= {precioDesde}")
@@ -160,14 +151,37 @@ async def get_public_properties(
         if estadoInmueble is not None:
             query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.estadoInmueble') = '{estadoInmueble}'")
 
-        # Combinar todas las condiciones en la consulta
+        # Construir la cláusula WHERE
         where_clause = " AND ".join(query_conditions)
         
-        sql_query = f"{SQL_SELECT_PUBLIC_PROPERTIES} WHERE {where_clause} ORDER BY properties.fecha_creacion DESC"
-        print(sql_query)
-        properties_dict = {}
-        rows = fetch_public_properties(sql_query)
+        # Construir la cláusula ORDER BY según el parámetro 'order'
+        if order == "relevancia":
+            order_by_clause = "ORDER BY properties.destacado DESC, properties.fecha_creacion DESC"
+        elif order == "MasBaratos":
+            order_by_clause = "ORDER BY properties.precio ASC"
+        elif order == "MasCaros":
+            order_by_clause = "ORDER BY properties.precio DESC"
+        else:  # Por defecto, recientes
+            order_by_clause = "ORDER BY properties.fecha_creacion DESC"
         
+        # Combinar consulta final
+        # sql_query = f"{SQL_SELECT_PUBLIC_PROPERTIES} WHERE {where_clause} {order_by_clause}"
+
+        # Consulta SQL final con limit y offset
+        sql_query = f"""
+            {SQL_SELECT_PUBLIC_PROPERTIES} 
+            WHERE {where_clause} 
+            {order_by_clause} 
+            LIMIT :limit OFFSET :offset
+        """
+        params = {"limit": limit, "offset": offset}
+        properties_dict = {}
+        rows = fetch_public_properties(sql_query, params)
+
+        # properties_dict = {}
+        # rows = fetch_public_properties(sql_query)
+        
+        # Construir la respuesta con las propiedades e imágenes
         for row in rows:
             property_id = row.property_id
             if property_id not in properties_dict:
@@ -183,70 +197,58 @@ async def get_public_properties(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# Funcion para obtener propiedades desde su id
 @publicProperties.get("/get-public-property-disponibles/{property_id}")
 async def get_public_property_by_id(property_id: int):
     try:
         rows = fetch_public_properties(SQL_SELECT_PUBLIC_PROPERTIES + " WHERE properties.id = :property_id", {"property_id": property_id})
-        
         if not rows:
             raise HTTPException(status_code=404, detail="Property not found")
-
-        property_dict = build_public_property_dict(rows[0])
-        
+        property_dict = build_public_property_dict(rows[0]) 
         for row in rows:
             property_dict["image"].append({
                 "id_image": row.image_id,
                 "image_name": row.image_name
-            })
-        
+            })  
         return property_dict
-
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 
+# Funcion para obtener propiedades desde su sku
+@publicProperties.get("/get-public-property-disponibles/{property_sku}")
+async def get_public_property_by_id(property_id: int):
+    try:
+        rows = fetch_public_properties(SQL_SELECT_PUBLIC_PROPERTIES + " WHERE properties.sku = :property_sku", {"property_sku": property_sku})
+        if not rows:
+            raise HTTPException(status_code=404, detail="Property not found")
+        property_dict = build_public_property_dict(rows[0]) 
+        for row in rows:
+            property_dict["image"].append({
+                "id_image": row.image_id,
+                "image_name": row.image_name
+            })  
+        return property_dict
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
-        # 
 
 
+# Funcion para obtener propiedades destacadas
 @publicProperties.get("/get-public-property-destacadas")
 async def get_public_properties_destacadas():
     try:
         properties_dict = {}
         rows = fetch_public_properties(SQL_SELECT_PUBLIC_PROPERTIES + " WHERE properties.destacado = 1 AND properties.disponibilidad = 'disponible' ORDER BY properties.fecha_creacion DESC")
-        
         for row in rows:
             property_id = row.property_id
             if property_id not in properties_dict:
-                properties_dict[property_id] = build_public_property_dict(row)
-                
+                properties_dict[property_id] = build_public_property_dict(row)  
             properties_dict[property_id]["image"].append({
                 "id_image": row.image_id,
                 "image_name": row.image_name
             })
-        
         return list(properties_dict.values())
-
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

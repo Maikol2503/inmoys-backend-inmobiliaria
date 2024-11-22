@@ -1,0 +1,4 @@
+{
+    "python.analysis.autoImportCompletions": true,
+    "python.pythonPath": "~/Desktop/inmo/BACKEND/API-DASHBOARD/inmovenv/Scripts/python.exe"  // Para Windows
+}

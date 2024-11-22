@@ -8,6 +8,7 @@ class CreateData:
     
 
     def datageneral(self, data):
+        # print(data, 'dataaa')
         dataGeneral = {
             'sku': self.generate_sku(data.tipo[0] + data.transaccion[0]),
             'destacado': data.destacado,
@@ -24,6 +25,7 @@ class CreateData:
             'nombreCalle': data.nombreCalle,
             'planta': data.planta,
             'puerta': data.puerta,
+            'image': data.image
         }
         return dataGeneral
 
@@ -80,7 +82,6 @@ class CreateData:
     def terreno(self, data):
         terrreno_data = self.datageneral(data)
         terrreno_data['detalles'] = {
-
         }
         return terrreno_data
 
@@ -92,4 +93,5 @@ class CreateData:
         suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))  # Usa solo letras minúsculas
         sku = f"{prefix}{unique_id[:4]}-{suffix}".lower()  # Convierte todo el SKU a minúsculas
         return sku
+
 

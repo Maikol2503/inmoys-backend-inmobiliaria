@@ -7,4 +7,4 @@ class Imagen(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     image = Column(Text)
-    property_id = Column(Integer, ForeignKey('properties.id'))
+    # property_id = Column(Integer, ForeignKey('properties.id'))
