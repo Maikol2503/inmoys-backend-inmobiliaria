@@ -18,7 +18,7 @@ azure-common==1.1.28
 azure-core==1.29.6
 Babel==2.13.1
 backcall==0.2.0
-bcrypt==4.2.0
+bcrypt==3.2.0
 beautifulsoup4==4.12.2
 bleach==6.1.0
 blinker==1.7.0
@@ -52,7 +52,6 @@ executing==2.0.1
 Faker==28.4.1
 fastapi==0.99.1
 fastjsonschema==2.18.1
-faust-streaming==0.10.16
 filelock==3.13.1
 Flask==3.0.0
 Flask-Cors==4.0.0
@@ -176,6 +175,7 @@ pytest==7.4.0
 python-dateutil==2.8.2
 python-decouple==3.8
 python-dotenv==1.0.0
+python-http-client==3.3.7
 python-jose==3.3.0
 python-json-logger==2.0.7
 python-magic==0.4.27
@@ -207,6 +207,7 @@ scipy==1.11.4
 seaborn==0.13.0
 selenium==4.15.1
 Send2Trash==1.8.2
+sendgrid==6.11.0
 six==1.16.0
 smart-open==6.4.0
 smmap==5.0.1
@@ -219,6 +220,7 @@ spacy-loggers==1.0.5
 SQLAlchemy==2.0.18
 srsly==2.4.8
 stack-data==0.6.3
+starkbank-ecdsa==2.2.0
 starlette==0.27.0
 streamlit==1.29.0
 supervision==0.17.1

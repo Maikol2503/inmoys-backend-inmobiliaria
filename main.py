@@ -1,6 +1,9 @@
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 
+from fastapi.middleware.wsgi import WSGIMiddleware
+import os
+
 from fastapi.templating import Jinja2Templates
 from config.db import Base, engine
 from fastapi.middleware.cors import CORSMiddleware
@@ -83,3 +86,9 @@ def root():
         "message":"hola desde la ruta main"
     }
 
+
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
