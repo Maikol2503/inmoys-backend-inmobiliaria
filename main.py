@@ -64,7 +64,7 @@ app.add_middleware(
 @app.get("/")
 def root():
     return {
-        "message":"hola desde la ruta main"
+        "message":"Hola desde la ruta main."
     }
 
 
