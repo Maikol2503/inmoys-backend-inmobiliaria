@@ -21,14 +21,6 @@ from administracion.API_property.routes.public_get import publicProperties
 from administracion.API_property.routes.update import updateProperties
 from administracion.API_property.routes.delete import deleteProperties
 
-# from administracion.API_propietario.routes.add import addPropietario
-# from administracion.API_propietario.routes.update import updatePropietario
-
-# from administracion.API_property.images_propertys.routes.add import addImagenProperty
-# from administracion.API_property.images_propertys.routes.get import getImagenProperty
-# from administracion.API_property.images_propertys.routes.update import updateImagenProperty
-# from administracion.API_property.images_propertys.routes.delete import deleteImagenProperty
-
 from mail.mail import sendEmail 
 app = FastAPI()
 jinja2Templates = Jinja2Templates(directory="templates")
@@ -42,18 +34,6 @@ app.include_router(admiLogin)
 
 app.include_router(addClient)
 
-# app.include_router(addContrato)
-# app.include_router(getContrato)
-
-# app.include_router(addPropietario)
-# app.include_router(updatePropietario)
-
-# app.include_router(addImagenProperty)
-# app.include_router(getImagenProperty)
-# app.include_router(publicProperties)
-# app.include_router(deleteImagenProperty)
-# app.include_router(updateImagenProperty)
-
 app.include_router(addProperties)
 app.include_router(getProperties)
 app.include_router(updateProperties)
@@ -66,7 +46,8 @@ Base.metadata.create_all(bind=engine)
 
 origins = [
     "http://localhost:4300",
-    "http://localhost:4200"
+    "http://localhost:4200",
+    'https://inmoys-dashboard.vercel.app'
 ]
 
 # Configuración de CORS
