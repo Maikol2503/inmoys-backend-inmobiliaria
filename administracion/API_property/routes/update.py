@@ -1,7 +1,6 @@
 import base64
 from io import BytesIO
 import os
-from tkinter import Image
 import uuid
 from fastapi import APIRouter, HTTPException, Depends, status
 from pathlib import Path
