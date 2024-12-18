@@ -43,13 +43,11 @@ app.include_router(sendEmail)
 
 Base.metadata.create_all(bind=engine)
 
-
 origins = [
     "http://localhost:4300",
     "http://localhost:4200",
     "https://inmoys-dashboard.vercel.app"
 ]
-
 
 # Configuración de CORS
 app.add_middleware(
@@ -60,15 +58,11 @@ app.add_middleware(
     allow_headers=["*"],  # Permitir todos los encabezados
 )
 
-
-
 @app.get("/")
 def root():
     return {
         "message":"Hola desde la ruta main."
     }
-
-
 
 if __name__ == "__main__":
     import uvicorn
