@@ -50,6 +50,7 @@ origins = [
     "https://inmoys-dashboard.vercel.app"
 ]
 
+
 # Configuración de CORS
 app.add_middleware(
     CORSMiddleware,
