@@ -294,18 +294,15 @@ async def get_public_property_by_id(property_id: int):
 
 # Funcion para obtener propiedades destacadas
 @publicProperties.get("/get-public-property-destacadas")
-async def get_public_properties_destacadas():
+async def get_public_properties_destacadas(limit: int = 2, offset: int = 1):
     try:
         properties_dict = {}
-        rows = fetch_public_properties(SQL_SELECT_PUBLIC_PROPERTIES + " WHERE properties.destacado = 1 AND properties.disponibilidad = 'disponible' ORDER BY properties.fecha_creacion DESC")
+        params = {"limit": limit, "offset": offset}
+        rows = fetch_public_properties(SQL_SELECT_PUBLIC_PROPERTIES + " WHERE properties.destacado = 1 AND properties.disponibilidad = 'disponible' ORDER BY properties.fecha_creacion DESC LIMIT :limit OFFSET :offset" , params)
         for row in rows:
             property_id = row.property_id
             if property_id not in properties_dict:
-                properties_dict[property_id] = build_public_property_dict(row)  
-            properties_dict[property_id]["image"].append({
-                "id_image": row.image_id,
-                "image_name": row.image_name
-            })
+                properties_dict[property_id] = build_public_property_dict(row)
         return list(properties_dict.values())
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
