@@ -73,7 +73,6 @@ def applyPagination(page:int, limit:int):
 # Función para obtener propiedades desde la base de datos
 def fetch_properties(sql_query, params={}):
     with Session() as db:
-        print(text(sql_query), params)
         result = db.execute(text(sql_query), params)
         rows = result.fetchall()
         
@@ -206,6 +205,7 @@ async def get_properties(tipo: str = None,
         rows = fetch_properties(sql_query, params)
         # Construir resultado
         properties_dict = {}
+        
         for row in rows:
             property_id = row.property_id
             if property_id not in properties_dict:

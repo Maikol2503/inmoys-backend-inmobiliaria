@@ -20,7 +20,7 @@ fake = Faker()
 addProperties = APIRouter()
 db = Session()
 
-url = 'http://localhost:8000/'
+# url = 'http://localhost:8000/'
 BASE_IMAGE_DIR = "imagenes"
 os.makedirs(BASE_IMAGE_DIR, exist_ok=True)
 

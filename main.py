@@ -39,6 +39,8 @@ app.include_router(getProperties)
 app.include_router(updateProperties)
 app.include_router(deleteProperties)
 
+app.include_router(publicProperties)
+
 app.include_router(sendEmail)
 
 Base.metadata.create_all(bind=engine)

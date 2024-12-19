@@ -21,21 +21,19 @@ SQL_SELECT_PUBLIC_PROPERTIES = """
         properties.ciudad AS property_ciudad,
         properties.zona AS property_zona,
         properties.puerta AS property_puerta,
-        properties.numeroCalle AS property_numeroCalle,
         properties.nombreCalle AS property_nombreCalle,
         properties.cp AS property_cp,
         properties.planta AS property_planta,
         properties.detalles AS property_detalles,
         properties.fecha_creacion AS property_fecha_creacion,
-        imagesproperties.id AS image_id,
-        imagesproperties.image AS image_name
+        properties.image AS property_image
     FROM properties
-    INNER JOIN imagesproperties ON properties.id = imagesproperties.property_id
 """
 
 # Función para construir la respuesta de propiedad pública
 def build_public_property_dict(row):
     detalles_deserializados = json.loads(row.property_detalles)
+    imagenes_deserializados = json.loads(row.property_image)
     return {
         "sku": row.property_sku,
         "id_property": row.property_id,
@@ -50,25 +48,24 @@ def build_public_property_dict(row):
         "zona": row.property_zona,
         "cp": row.property_cp,
         "puerta": row.property_puerta,
-        "numeroCalle": row.property_numeroCalle,
         "nombreCalle": row.property_nombreCalle,
         "planta": row.property_planta,
         "detalles": detalles_deserializados,
-        "image": [],
+        "image": imagenes_deserializados,
         "fecha_creacion": row.property_fecha_creacion
     }
 
 # Función para obtener propiedades desde la base de datos
 def fetch_public_properties(sql_query, params={}):
-    with Session() as db:
+     with Session() as db:
         result = db.execute(text(sql_query), params)
         rows = result.fetchall()
-    return rows
+        
+     return rows
 
 # Funcion para obtener las propiedades aplicando filtros
 @publicProperties.get("/get-public-properties-disponibles")
-async def get_public_properties(
-    tipo: str = None,
+async def get_public_properties( tipo: str = None,
     transaccion: str = None,
     ciudad: str = None,
     zona: str = None,
@@ -97,102 +94,162 @@ async def get_public_properties(
 ):
     try:
         query_conditions = ["properties.disponibilidad = 'disponible'"]
+        params = {}
 
         if tipo:
-            query_conditions.append(f"properties.tipo = '{tipo}'")
+            query_conditions.append("properties.tipo = :tipo")
+            params["tipo"] = tipo
         if transaccion:
-            query_conditions.append(f"properties.transaccion = '{transaccion}'")
+            query_conditions.append("properties.transaccion = :transaccion")
+            params["transaccion"] = transaccion
         if ciudad:
-            query_conditions.append(f"properties.ciudad = '{ciudad}'")
+            query_conditions.append("properties.ciudad = :ciudad")
+            params["ciudad"] = ciudad
         if zona:
-            query_conditions.append(f"(properties.zona LIKE '%{zona}%' OR properties.ciudad LIKE '%{zona}%' OR properties LIKE '%{zona}%')")
+            query_conditions.append("(properties.zona LIKE :zona OR properties.ciudad LIKE :zona)")
+            params["zona"] = f"%{zona}%"
         if habitaciones:
             if numeroExactoHabitaciones == True:
-                query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.habitaciones') = {habitaciones}")
+                query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.habitaciones') = :habitaciones")
+                params["habitaciones"] = habitaciones
             elif numeroExactoHabitaciones == False :
-                query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.habitaciones') >= {habitaciones}")
+                query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.habitaciones') >= :habitaciones")
+                params["habitaciones"] = habitaciones
         if banos:
             if numeroExactoBanos == True:
-                query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.banos') = '{banos}'")
-            elif numeroExactoBanos == False:
-                query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.banos') >= '{banos}'")
+                query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.banos') = :banos")
+                params["banos"] = banos
+            elif numeroExactoBanos == False :
+                query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.banos') >= :banos")
+                params["banos"] = banos
         if garaje is not None and garaje == True:
-            query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.garaje') = '{str(garaje).lower()}'")
+            query_conditions.append("JSON_UNQUOTE(properties.detalles->'$.garaje') = :garaje")
+            params["garaje"] = str(garaje).lower()
         if piscina is not None and piscina == True:
-            query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.piscina') = '{str(piscina).lower()}'")
-        if trastero is not None and trastero == True:
-            query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.trastero') = '{str(trastero).lower()}'")
-        if jardin is not None and jardin == True:
-            query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.jardin') = '{str(jardin).lower()}'")
-        if ascensor is not None and ascensor  == True:
-            query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.ascensor') = '{str(ascensor).lower()}'")
+            query_conditions.append("JSON_UNQUOTE(properties.detalles->'$.piscina') = :piscina")
+            params["piscina"] = str(piscina).lower()
         if gimnasio is not None and gimnasio == True:
-            query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.gimnasio') = '{str(gimnasio).lower()}'")
+            query_conditions.append("JSON_UNQUOTE(properties.detalles->'$.gimnasio') = :gimnasio")
+            params["gimnasio"] = str(gimnasio).lower()
         if aireAcondicionado is not None and aireAcondicionado == True:
-            query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.aire') = '{str(aireAcondicionado).lower()}'")
+            query_conditions.append("JSON_UNQUOTE(properties.detalles->'$.aireAcondicionado') = :aireAcondicionado")
+            params["aireAcondicionado"] = str(aireAcondicionado).lower()
+        if trastero is not None and trastero == True:
+            query_conditions.append("JSON_UNQUOTE(properties.detalles->'$.trastero') = :trastero")
+            params["trastero"] = str(trastero).lower()
+        if jardin is not None and jardin == True:
+            query_conditions.append("JSON_UNQUOTE(properties.detalles->'$.jardin') = :jardin")
+            params["jardin"] = str(jardin).lower()
+        if ascensor is not None and ascensor == True:
+            query_conditions.append("JSON_UNQUOTE(properties.detalles->'$.ascensor') = :ascensor")
+            params["ascensor"] = str(ascensor).lower()
         if calefaccion is not None and calefaccion == True:
-            query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.calefaccion') = '{str(calefaccion).lower()}'")
+            query_conditions.append("JSON_UNQUOTE(properties.detalles->'$.calefaccion') = :calefaccion")
+            params["calefaccion"] = str(calefaccion).lower()
         if terraza is not None and terraza == True:
-            query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.terraza') = '{str(terraza).lower()}'")
+            query_conditions.append("JSON_UNQUOTE(properties.detalles->'$.terraza') = :terraza")
+            params["terraza"] = str(terraza).lower()
         if balcon is not None and balcon == True:
-            query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.balcon') = '{str(balcon).lower()}'")
+            query_conditions.append("JSON_UNQUOTE(properties.detalles->'$.balcon') = :balcon")
+            params["balcon"] = str(balcon).lower()
+        if precioDesde is not None and precioDesde > 0:
+            query_conditions.append("properties.precio >= :precioDesde")
+            params["precioDesde"] = precioDesde
+        if precioHasta is not None and precioHasta > 0:
+            query_conditions.append("properties.precio <= :precioHasta")
+            params["precioHasta"] = precioHasta
+        if tamanoDesde is not None and tamanoDesde > 0:
+            query_conditions.append("JSON_UNQUOTE(properties.detalles->'$.tamano') >= :tamanoDesde")
+            params["tamanoDesde"] = tamanoDesde
+        if tamanoHasta is not None and tamanoHasta > 0:
+            query_conditions.append("JSON_UNQUOTE(properties.detalles->'$.tamano') <= :tamanoHasta")
+            params["tamanoHasta"] = tamanoHasta
+        if estadoInmueble:
+            query_conditions.append("JSON_UNQUOTE(properties.detalles->'$.estadoInmueble') = :estadoInmueble")
+            params["estadoInmueble"] = estadoInmueble
         
         # Filtro de precio en rango, solo si el valor es mayor que 0
-        if precioDesde is not None and precioDesde > 0:
-            query_conditions.append(f"properties.precio >= {precioDesde}")
-        if precioHasta is not None and precioHasta > 0:
-            query_conditions.append(f"properties.precio <= {precioHasta}")
+        # if precioDesde is not None and precioDesde > 0:
+        #     query_conditions.append(f"properties.precio >= {precioDesde}")
+        # if precioHasta is not None and precioHasta > 0:
+        #     query_conditions.append(f"properties.precio <= {precioHasta}")
         
         # Filtro de tamaño en rango, solo si el valor es mayor que 0
-        if tamanoDesde is not None and tamanoDesde > 0:
-            query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.tamano') >= {tamanoDesde}")
-        if tamanoHasta is not None and tamanoHasta > 0:
-            query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.tamano') <= {tamanoHasta}")
-        if estadoInmueble is not None:
-            query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.estadoInmueble') = '{estadoInmueble}'")
+        # if tamanoDesde is not None and tamanoDesde > 0:
+        #     query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.tamano') >= {tamanoDesde}")
+        # if tamanoHasta is not None and tamanoHasta > 0:
+        #     query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.tamano') <= {tamanoHasta}")
+        # if estadoInmueble is not None:
+        #     query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.estadoInmueble') = '{estadoInmueble}'")
 
         # Construir la cláusula WHERE
         where_clause = " AND ".join(query_conditions)
         
         # Construir la cláusula ORDER BY según el parámetro 'order'
-        if order == "relevancia":
-            order_by_clause = "ORDER BY properties.destacado DESC, properties.fecha_creacion DESC"
-        elif order == "MasBaratos":
-            order_by_clause = "ORDER BY properties.precio ASC"
-        elif order == "MasCaros":
-            order_by_clause = "ORDER BY properties.precio DESC"
-        else:  # Por defecto, recientes
-            order_by_clause = "ORDER BY properties.fecha_creacion DESC"
+        # if order == "relevancia":
+        #     order_by_clause = "ORDER BY properties.destacado DESC, properties.fecha_creacion DESC"
+        # elif order == "MasBaratos":
+        #     order_by_clause = "ORDER BY properties.precio ASC"
+        # elif order == "MasCaros":
+        #     order_by_clause = "ORDER BY properties.precio DESC"
+        # else:  # Por defecto, recientes
+        #     order_by_clause = "ORDER BY properties.fecha_creacion DESC"
+
+        order_by_clause = {
+            "relevancia": "ORDER BY properties.destacado DESC, properties.fecha_creacion DESC",
+            "MasBaratos": "ORDER BY properties.precio ASC",
+            "MasCaros": "ORDER BY properties.precio DESC",
+        }.get(order, "ORDER BY properties.fecha_creacion DESC")
         
         # Combinar consulta final
         # sql_query = f"{SQL_SELECT_PUBLIC_PROPERTIES} WHERE {where_clause} {order_by_clause}"
 
         # Consulta SQL final con limit y offset
         sql_query = f"""
-            {SQL_SELECT_PUBLIC_PROPERTIES} 
-            WHERE {where_clause} 
-            {order_by_clause} 
+            {SQL_SELECT_PUBLIC_PROPERTIES}
+            WHERE {where_clause}
+            {order_by_clause}
+            
             LIMIT :limit OFFSET :offset
         """
-        params = {"limit": limit, "offset": offset}
-        properties_dict = {}
+        params["limit"] = limit
+        params["offset"] = (offset - 1) * limit
+        print('**********************************')
+        print(params)
+        print('**********************************')
+        print('**********************************')
+        print(sql_query)
+        print('**********************************')
         rows = fetch_public_properties(sql_query, params)
+
+        properties_dict = {}
 
         # properties_dict = {}
         # rows = fetch_public_properties(sql_query)
         
         # Construir la respuesta con las propiedades e imágenes
+        # for row in rows:
+        #     property_id = row.property_id
+        #     if property_id not in properties_dict:
+        #         properties_dict[property_id] = build_public_property_dict(row)
+                
+        #     properties_dict[property_id]["image"].append({
+        #         "id_image": row.image_id,
+        #         "image_name": row.image_name
+        #     })
+        
+        # return list(properties_dict.values())
+
+
+        
+
         for row in rows:
             property_id = row.property_id
             if property_id not in properties_dict:
                 properties_dict[property_id] = build_public_property_dict(row)
-                
-            properties_dict[property_id]["image"].append({
-                "id_image": row.image_id,
-                "image_name": row.image_name
-            })
-        
         return list(properties_dict.values())
+
+        # return []
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
