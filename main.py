@@ -48,7 +48,8 @@ Base.metadata.create_all(bind=engine)
 origins = [
     "http://localhost:4300",
     "http://localhost:4200",
-    "https://inmoys-dashboard.vercel.app"
+    "https://inmoys-dashboard.vercel.app",
+    "https://inmoys-17gs94nzx-maikols-projects-8f2c5a43.vercel.app/"
 ]
 
 # Configuración de CORS
