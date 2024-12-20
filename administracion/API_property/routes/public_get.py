@@ -167,42 +167,16 @@ async def get_public_properties( tipo: str = None,
         if estadoInmueble:
             query_conditions.append("JSON_UNQUOTE(properties.detalles->'$.estadoInmueble') = :estadoInmueble")
             params["estadoInmueble"] = estadoInmueble
-        
-        # Filtro de precio en rango, solo si el valor es mayor que 0
-        # if precioDesde is not None and precioDesde > 0:
-        #     query_conditions.append(f"properties.precio >= {precioDesde}")
-        # if precioHasta is not None and precioHasta > 0:
-        #     query_conditions.append(f"properties.precio <= {precioHasta}")
-        
-        # Filtro de tamaño en rango, solo si el valor es mayor que 0
-        # if tamanoDesde is not None and tamanoDesde > 0:
-        #     query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.tamano') >= {tamanoDesde}")
-        # if tamanoHasta is not None and tamanoHasta > 0:
-        #     query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.tamano') <= {tamanoHasta}")
-        # if estadoInmueble is not None:
-        #     query_conditions.append(f"JSON_UNQUOTE(properties.detalles->'$.estadoInmueble') = '{estadoInmueble}'")
+
 
         # Construir la cláusula WHERE
         where_clause = " AND ".join(query_conditions)
-        
-        # Construir la cláusula ORDER BY según el parámetro 'order'
-        # if order == "relevancia":
-        #     order_by_clause = "ORDER BY properties.destacado DESC, properties.fecha_creacion DESC"
-        # elif order == "MasBaratos":
-        #     order_by_clause = "ORDER BY properties.precio ASC"
-        # elif order == "MasCaros":
-        #     order_by_clause = "ORDER BY properties.precio DESC"
-        # else:  # Por defecto, recientes
-        #     order_by_clause = "ORDER BY properties.fecha_creacion DESC"
 
         order_by_clause = {
             "relevancia": "ORDER BY properties.destacado DESC, properties.fecha_creacion DESC",
             "MasBaratos": "ORDER BY properties.precio ASC",
             "MasCaros": "ORDER BY properties.precio DESC",
         }.get(order, "ORDER BY properties.fecha_creacion DESC")
-        
-        # Combinar consulta final
-        # sql_query = f"{SQL_SELECT_PUBLIC_PROPERTIES} WHERE {where_clause} {order_by_clause}"
 
         # Consulta SQL final con limit y offset
         sql_query = f"""
@@ -214,34 +188,8 @@ async def get_public_properties( tipo: str = None,
         """
         params["limit"] = limit
         params["offset"] = (offset - 1) * limit
-        print('**********************************')
-        print(params)
-        print('**********************************')
-        print('**********************************')
-        print(sql_query)
-        print('**********************************')
         rows = fetch_public_properties(sql_query, params)
-
         properties_dict = {}
-
-        # properties_dict = {}
-        # rows = fetch_public_properties(sql_query)
-        
-        # Construir la respuesta con las propiedades e imágenes
-        # for row in rows:
-        #     property_id = row.property_id
-        #     if property_id not in properties_dict:
-        #         properties_dict[property_id] = build_public_property_dict(row)
-                
-        #     properties_dict[property_id]["image"].append({
-        #         "id_image": row.image_id,
-        #         "image_name": row.image_name
-        #     })
-        
-        # return list(properties_dict.values())
-
-
-        
 
         for row in rows:
             property_id = row.property_id
@@ -274,18 +222,14 @@ async def get_public_property_by_id(property_id: int):
 
 
 # Funcion para obtener propiedades desde su sku
-@publicProperties.get("/get-public-property-disponibles/{property_sku}")
-async def get_public_property_by_id(property_id: int):
+@publicProperties.get("/get-public-property-by-sku-similar/{sku}")
+async def get_public_property_by_sku(sku: str):
     try:
-        rows = fetch_public_properties(SQL_SELECT_PUBLIC_PROPERTIES + " WHERE properties.sku = :property_sku", {"property_sku": property_sku})
+        rows = fetch_public_properties(SQL_SELECT_PUBLIC_PROPERTIES + " WHERE properties.sku = :property_sku", {"property_sku": sku})
         if not rows:
             raise HTTPException(status_code=404, detail="Property not found")
         property_dict = build_public_property_dict(rows[0]) 
-        for row in rows:
-            property_dict["image"].append({
-                "id_image": row.image_id,
-                "image_name": row.image_name
-            })  
+        
         return property_dict
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

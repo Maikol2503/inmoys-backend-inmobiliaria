@@ -19,9 +19,9 @@
 
 
 # @getImagenProperty.get("/obtener-imagenes-propiedad")
-# async def get_image_urls(property_id: int):
+# async def get_image_urls(property_sku: int):
 #     try:
-#         images = db.query(Imagen).filter(Imagen.property_id == property_id).all()
+#         images = db.query(Imagen).filter(Imagen.property_sku == property_sku).all()
 #         image_urls = [os.path.join(os.path.basename(image.image)) for image in images]
 #         print(images, 'bffx')
 #         return image_urls
