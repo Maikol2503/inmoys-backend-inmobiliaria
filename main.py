@@ -45,9 +45,10 @@ app.include_router(sendEmail)
 
 Base.metadata.create_all(bind=engine)
 
+    # "http://localhost:4300",
+    # "http://localhost:4200",
+
 origins = [
-    "http://localhost:4300",
-    "http://localhost:4200",
     "https://inmoys-dashboard.vercel.app",
     "https://inmoys-17gs94nzx-maikols-projects-8f2c5a43.vercel.app",
     "https://inmoys-tau.vercel.app"
